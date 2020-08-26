@@ -1,0 +1,68 @@
+#!/bin/bash
+#Stupid Simple Thinkpad Fan
+#This is a simple automatic fan control program for my X60s
+#This is designed to be a dead simple solution that you can daemonize
+#or put in a crontab to control your fan.
+
+#Grabs the first temp which happens to be my CPU temp (yours may vary)
+CPUTEMP=$(cat /proc/acpi/ibm/thermal | sed s/temp.*:.// | sed s/\ .*//)
+
+#Below are the fan speeds from lowest to highest.
+#The numbers show at what range should this level be
+#active. Do not set ranges that cross each other.
+#Levels will be compared to temperature with greater/less than 
+#or EQUAL to.
+#1-7 are normal fan speeds. 8 is full-speed/disengaged
+LEVELS=(0 0\
+        0 0\
+        0 0\
+        0 0\
+        0 0\
+        0 0\
+        0 76\
+        76 999\
+)
+
+#How long until fan switches back to auto
+# 0 disables switching back to keep the fan controlled.
+WATCHDOG=0
+
+#Determines what level is required for current temp
+TEMP=-666
+LEVELCOUNT=1
+for i in ${LEVELS[@]}
+do
+  if [[ $TEMP == -666 ]]
+  then
+    TEMP=$i
+    continue
+  else
+    if [[ $TEMP -le $CPUTEMP ]] && [[ $i -ge $CPUTEMP ]]
+    then
+      break
+    fi
+    TEMP=-666
+    LEVELCOUNT=$(( $LEVELCOUNT + 1 ))
+  fi 
+done
+
+#Level can be text like below
+CURRENTLEVEL="$(cat /proc/acpi/ibm/fan | grep level: | sed s/level:..//)"
+if [ "$CURRENTLEVEL" == "disengaged" ] || [ "$CURRENTLEVEL" == "full-speed" ]
+then
+  CURRENTLEVEL=8
+elif [ "$CURRENTLEVEL" == "auto" ]
+  then
+  CURRENTLEVEL=0
+fi
+
+#Execution
+if ! [ $CURRENTLEVEL == $LEVELCOUNT ]
+  then
+  echo "watchdog $WATCHDOG" > /proc/acpi/ibm/fan
+  if [ $LEVELCOUNT == 8 ]
+  then
+    LEVELCOUNT="full-speed"
+  fi
+  echo "level $LEVELCOUNT" > /proc/acpi/ibm/fan
+fi

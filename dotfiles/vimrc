@@ -1,0 +1,38 @@
+"Autoindent with tab being 2 spaces
+set autoindent
+set tabstop=2
+set expandtab
+set softtabstop=2 
+"Numbers On
+set number
+
+"get highlighting
+syntax on
+
+"always show the tab line
+set showtabline=2
+
+"always show status line
+set laststatus=2
+
+"fold method
+set foldmethod=marker
+nnoremap <space> za
+
+"bind F-Keys to move/manipulate tabs
+map <F8> :tabprevious <CR>
+map <F9> :tabnext <CR>
+map <F5> :tabnew <CR>
+map <F6> :tabmove - <CR>
+map <F7> :tabmove + <CR>
+
+colorscheme slate
+" DEFAULT THEMING CHANGES "
+"fix highlighting with menu
+"highlight Pmenu ctermfg=0 ctermbg=7 guifg=#000000 guibg=#F0F0F0
+"Line number colors
+"highlight LineNr ctermfg=3 ctermbg=0
+"Tabline 
+"highlight TabLineFill term=bold cterm=bold ctermbg=8 ctermfg=7
+"Status line colors
+"highlight StatusLine term=bold cterm=bold ctermbg=8 ctermfg=7
